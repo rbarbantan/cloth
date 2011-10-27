@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cloth</string>
+    <string name="settings_title">Cloth settings</string>
+    <string name="description">Simulates a piece of cloth on your device\'s background</string>
+    <string name="preference_bkg_title">Configure background</string>
+    <string name="preference_bkg_summary">Choose image for live wallpaper</string>
+</resources>

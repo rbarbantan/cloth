@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen 
+        xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:title="@string/settings_title">
+    <CheckBoxPreference
+                        android:title="Anchor bottom"
+                        android:defaultValue="true"
+                        android:summary="The bottom of the cloth can be attached to the screen"
+                        android:key="preference_fixedBottom" />
+    <PreferenceScreen
+                android:title="Select background"
+                android:summary="Choose background from online gallery">
+
+            <intent android:action="gallery.preference"/>
+
+ </PreferenceScreen>
+
+ 
+</PreferenceScreen>
