@@ -5,4 +5,5 @@
     <string name="description">Simulates a piece of cloth on your device\'s background</string>
     <string name="preference_bkg_title">Configure background</string>
     <string name="preference_bkg_summary">Choose image for live wallpaper</string>
+    <string name="error_pattern_list">Cannot retrieve any more patterns at the time. Check your connectivity and try again later</string>
 </resources>

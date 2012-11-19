@@ -1,73 +1,47 @@
 package ro.cornholio.wallpaper.cloth;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Address;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.Toast;
 
 public class GalleryActivity extends Activity {
 	private static final String AD_UNIT_ID = "a14e77762f9ba57";
-	
+	List<String> paths;
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery);
 		
 		try {
-			String jsonList = HttpUtils.getStringContent(HttpUtils.SERVER);
-			JSONObject root = new JSONObject(jsonList);
-			JSONArray items = root.getJSONArray("items");
-			final String[] paths = new String[items.length()];
-			for (int i = 0; i < items.length(); i++) {
-				JSONObject item = items.getJSONObject(i);
-				paths[i] = item.getString("name");
+			paths = (List<String>) getLastNonConfigurationInstance();
+			if(paths == null) {
+				paths = getItems(0, this);
 			}
 			GridView g = (GridView) findViewById(R.id.gridview);
 			g.setAdapter(new ImageAdapter(this, paths));
@@ -76,9 +50,9 @@ public class GalleryActivity extends Activity {
 				@Override
 				public void onItemClick(AdapterView<?> arg0, View arg1,
 						int arg2, long arg3) {
-					Log.e("ClothGallery", "selected: " + paths[arg2]);
+					Log.d("ClothGallery", "selected: " + paths.get(arg2));
 					SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(GalleryActivity.this).edit();
-					editor.putString("preference_bkg", paths[arg2]);
+					editor.putString("preference_bkg", paths.get(arg2));
 					editor.commit();
 					finish();
 					
@@ -94,23 +68,29 @@ public class GalleryActivity extends Activity {
 		//adView.loadAd(request);
 	}
 
+	
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return paths;
+	}
+
+
 	// *Image Adapter code*
 	private class ImageAdapter extends BaseAdapter {
-		private String[] items;
-		int mGalleryItemBackground;
+		private List<String> items;
 		private ThreadPoolExecutor pool;
 		private Bitmap defaultBitmap;
 		
-		public ImageAdapter(Context c, String[] items) {
+		public ImageAdapter(Context c, List<String> items) {
 			mContext = c;
 			this.items = items;
 			BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
 			this.pool = new ThreadPoolExecutor(10, 20, 60, TimeUnit.SECONDS, queue);
-			defaultBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.green);
+			defaultBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cloth_logo);
 		}
 
 		public int getCount() {
-			return items.length;
+			return items.size();
 		}
 
 		public Object getItem(int position) {
@@ -134,7 +114,12 @@ public class GalleryActivity extends Activity {
 			}
 			i.setImageBitmap(defaultBitmap);
 			try{
-				pool.execute(new DownloadTask(i,items[position], true));
+				pool.execute(new DownloadTask(i,items.get(position), true));
+				
+				if(position >= items.size() -10) {
+					//get some more
+					items.addAll(getItems(position, mContext));
+				}
 			}catch (RejectedExecutionException ex) {
 				//could not handle the load, ignore for now
 				//TODO  retry downloading the image
@@ -143,13 +128,23 @@ public class GalleryActivity extends Activity {
             return i; 
         }
 		private Context mContext;
-
-		/*
-		 * private Integer[] mImageIds = { R.drawable.marble_blue,
-		 * R.drawable.marble_green, R.drawable.marble_lgreen,
-		 * R.drawable.marble_purple, R.drawable.marble_red };
-		 */
-
+	}
+	
+	List<String> getItems(int position, Context context) {
+		List<String> paths = new ArrayList<String>();
+		try{
+			String jsonList = HttpUtils.getJsonPatterns(position);
+			JSONArray items = new JSONArray(jsonList);
+			for (int i = 0; i < items.length(); i++) {
+				JSONObject item = items.getJSONObject(i);
+				paths.add(item.getString("imageUrl"));
+			}
+		}catch(Exception e) {
+			Log.e(GalleryActivity.class.getName(), "could not get more items", e);
+			Toast.makeText(this, R.string.error_pattern_list, 100).show();
+		}
+		
+		return paths;
 	}
 
 }

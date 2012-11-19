@@ -7,7 +7,11 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.opengl.GLUtils;
 import android.util.Log;
 
@@ -119,8 +123,8 @@ public class VerletSystem {
 		current = 0;
 		for(float i=0; i<M; i++) {
 			for(float j=0; j<N; j++) {
-				texture[current++] = j/(M-1);
-				texture[current++] = i/(N-1);	
+				texture[current++] = j/(M-1)*4;
+				texture[current++] = i/(N-1)*4;	
 			}
 			
 		}
@@ -299,7 +303,7 @@ public class VerletSystem {
 		int newHeight, newWidth;
 		// newHeight= newWidth = getNearestMultipleOf((int) (bitmap.getHeight()
 		// * 0.75), 4);
-		newHeight = newWidth = 512;
+		newHeight = newWidth = 128;
 		float scaleW = (float) (1.0f * newWidth / bitmap.getWidth());
 		float scaleH = (float) (1.0f * newHeight / bitmap.getHeight());
 		matrix.postScale(scaleW, scaleH);
@@ -308,6 +312,13 @@ public class VerletSystem {
 		// bitmap = Bitmap.createScaledBitmap(bitmap, 1024, 2048, false);
 		bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);			
 
+		BitmapDrawable tile = new BitmapDrawable(bitmap);
+		tile.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		Rect bounds = new Rect(0, 0, 512, 512);
+		tile.setBounds(bounds);
+		
+		//bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), tile.getBitmap().getConfig());
+        
 		//Generate one texture pointer...
 		gl.glGenTextures(1, textures, 0);
 		//...and bind it to our array
@@ -350,7 +361,7 @@ public class VerletSystem {
 			//Log.d("VerletSystem", "selected: " + selected);
 			int zPos = 3 * selected + 2;
 			if(zPos < particles.length) {
-				particles[3 * selected + 2] -= 0.5f;
+				particles[3 * selected + 2] -= 0.9f;
 			}
 			
 		}

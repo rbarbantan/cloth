@@ -71,7 +71,7 @@ public class GalleryPreference extends Preference {
             public View getView(int position, View convertView, ViewGroup parent) { 
                 ImageView i = new ImageView(mContext); 
 
-                i.setImageResource(R.drawable.green); 
+                i.setImageResource(R.drawable.cloth_logo); 
                 i.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 i.setLayoutParams(new GridView.LayoutParams(75, 75)); 
                 i.setPadding(5, 5, 5, 5);

@@ -15,7 +15,7 @@ public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int green=0x7f020000;
+        public static final int cloth_logo=0x7f020000;
         public static final int icon=0x7f020001;
     }
     public static final class id {
@@ -30,6 +30,7 @@ public final class R {
     public static final class string {
         public static final int app_name=0x7f060000;
         public static final int description=0x7f060002;
+        public static final int error_pattern_list=0x7f060005;
         public static final int preference_bkg_summary=0x7f060004;
         public static final int preference_bkg_title=0x7f060003;
         public static final int settings_title=0x7f060001;

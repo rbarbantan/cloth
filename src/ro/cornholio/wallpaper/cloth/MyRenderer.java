@@ -50,14 +50,14 @@ public class MyRenderer implements Renderer {
 		gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, // OpenGL docs.
 				GL10.GL_FASTEST);
 		gl.glEnable(GL10.GL_TEXTURE_2D); // Enable Texture Mapping ( NEW )
-		String background = PreferenceManager.getDefaultSharedPreferences(context).getString("preference_bkg", "green");
+		String background = PreferenceManager.getDefaultSharedPreferences(context).getString("preference_bkg", "cloth_logo");
 		//Log.d("ClothRenderer", background);
 		Bitmap bitmap = null;
-		if(!"green".equalsIgnoreCase(background)){
+		if(!"cloth_logo".equalsIgnoreCase(background)){
 			bitmap = HttpUtils.loadImage(background, false);
 		}
 		if(bitmap == null) {
-			bitmap = BitmapFactory.decodeResource(context.getResources(), context.getResources().getIdentifier("ro.cornholio.wallpaper.cloth:drawable/"+background, null,null));
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.cloth_logo);
 		}
 		if(bitmap != null){
 			system.loadGLTexture(gl, bitmap);
@@ -88,17 +88,11 @@ public class MyRenderer implements Renderer {
 		gl.glClear(GL10.GL_COLOR_BUFFER_BIT | // OpenGL docs.
 				GL10.GL_DEPTH_BUFFER_BIT);
 		gl.glLoadIdentity();
-		
-		//triangle.draw(gl);
 		gl.glTranslatef(-1.0f, 1.0f, 0.0f);
 		gl.glScalef(0.2f, 0.2f, 0.2f);
 		system.draw(gl);
 		system.timeStep();
-		/*if(frame %50 == 0) {
-			system.setGravity(new float[] {(random.nextFloat()-0.5f)/10,(random.nextFloat()-0.5f)/10,0});
-			frame = 0;
-		}*/
-		frame++;
+			
 	}
 
 	

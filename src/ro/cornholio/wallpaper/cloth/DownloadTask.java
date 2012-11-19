@@ -18,7 +18,7 @@ public class DownloadTask implements Runnable {
 	
 	@Override
 	public void run() {
-		final Bitmap img = HttpUtils.loadImage(imageUrl, isThumbnail);
+		final Bitmap img = HttpUtils.loadImage(imageUrl, false);
 		imgView.post(new Runnable() {
 			
 			@Override
