@@ -54,7 +54,7 @@ public class VerletSystem {
 	/** Our texture pointer */
 	private int[] textures = new int[1];
 
-	public VerletSystem(int width, int height, boolean fixedBottom) {
+	public VerletSystem(int width, int height, boolean fixedBottom, int zoom) {
 		this.width = width;
 		this.height = height;
 		
@@ -119,12 +119,23 @@ public class VerletSystem {
 			colors[4*i+2] = (float) Math.random();
 			colors[4*i+3] = 1f;
 		}
+		float ratio = (float)width/height;
+		Log.d("x","ratio" +ratio);
+		float dx = 0;
+		float dy = 0;
+		if(ratio < 1) {
+			dx = (1-ratio)*zoom;
+			dy = ratio*zoom;
+		}else {
+			dx = (ratio - 1)*zoom;
+			dy = (2 - ratio)*zoom;
+		}
 		float[] texture = new float[particles.length/3*2];
 		current = 0;
 		for(float i=0; i<M; i++) {
 			for(float j=0; j<N; j++) {
-				texture[current++] = j/(M-1)*4;
-				texture[current++] = i/(N-1)*4;	
+				texture[current++] = j/(M-1)*dx;
+				texture[current++] = i/(N-1)*dy;	
 			}
 			
 		}
@@ -311,11 +322,11 @@ public class VerletSystem {
 
 		// bitmap = Bitmap.createScaledBitmap(bitmap, 1024, 2048, false);
 		bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);			
-
-		BitmapDrawable tile = new BitmapDrawable(bitmap);
-		tile.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-		Rect bounds = new Rect(0, 0, 512, 512);
-		tile.setBounds(bounds);
+		
+		//BitmapDrawable tile = new BitmapDrawable(bitmap);
+		//tile.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		//Rect bounds = new Rect(0, 0, 32, 32);
+		//tile.setBounds(bounds);
 		
 		//bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), tile.getBitmap().getConfig());
         
@@ -361,7 +372,8 @@ public class VerletSystem {
 			//Log.d("VerletSystem", "selected: " + selected);
 			int zPos = 3 * selected + 2;
 			if(zPos < particles.length) {
-				particles[3 * selected + 2] -= 0.9f;
+				//particles[3 * selected + 2] -= 0.9f;
+				particles[3 * selected + 2] = 0f;
 			}
 			
 		}

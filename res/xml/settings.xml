@@ -12,8 +12,14 @@
                 android:summary="Choose background from online gallery">
 
             <intent android:action="gallery.preference"/>
-
- </PreferenceScreen>
-
+	</PreferenceScreen>
+	<ro.cornholio.wallpaper.cloth.SeekbarPreference android:key="preference_zoom"
+        android:title="Zoom factor"
+        android:summary="How many times will the pattern be repeated"
+        android:dialogMessage="Zoom out"
+        android:defaultValue="9"
+        android:text="x"
+        android:max="29"
+        />
  
 </PreferenceScreen>

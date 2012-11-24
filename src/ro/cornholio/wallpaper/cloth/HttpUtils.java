@@ -60,8 +60,8 @@ public class HttpUtils {
 			Log.e(HttpUtils.class.getName(), "could not get more patterns", ex);
 		} finally {
 			try {
-				buf.close();
-				ips.close();
+				if(buf != null)buf.close();
+				if(ips != null)ips.close();
 			} catch (IOException e) {
 				Log.e(HttpUtils.class.getName(), "could not close streams", e);
 			}

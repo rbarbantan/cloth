@@ -29,12 +29,8 @@ public class MyRenderer implements Renderer {
 	
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-		boolean fixedBottom = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("preference_fixedBottom", true);
-		this.system = new VerletSystem(480,800, fixedBottom);
 		
 		//GLU.gluPerspective(gl, 0f, 0f, 0f, 10f);
-		
-		
 		gl.glDisable(GL10.GL_DITHER);
 		// Set the background color to black ( rgba ).
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.5f); // OpenGL docs.
@@ -50,6 +46,15 @@ public class MyRenderer implements Renderer {
 		gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, // OpenGL docs.
 				GL10.GL_FASTEST);
 		gl.glEnable(GL10.GL_TEXTURE_2D); // Enable Texture Mapping ( NEW )
+
+	}
+
+	@Override
+	public void onSurfaceChanged(GL10 gl, int width, int height) {
+		boolean fixedBottom = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("preference_fixedBottom", true);
+		int zoom = PreferenceManager.getDefaultSharedPreferences(context).getInt("preference_zoom", 1) * 2 + 1;
+		Log.d("zoom", ""+zoom);
+		this.system = new VerletSystem(width,height, fixedBottom, zoom);
 		String background = PreferenceManager.getDefaultSharedPreferences(context).getString("preference_bkg", "cloth_logo");
 		//Log.d("ClothRenderer", background);
 		Bitmap bitmap = null;
@@ -62,11 +67,6 @@ public class MyRenderer implements Renderer {
 		if(bitmap != null){
 			system.loadGLTexture(gl, bitmap);
 		}
-
-	}
-
-	@Override
-	public void onSurfaceChanged(GL10 gl, int width, int height) {
 		// Sets the current view port to the new size.
 		gl.glViewport(0, 0, width, height);
 		// Select the projection matrix
