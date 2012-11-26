@@ -50,7 +50,7 @@ public class PatternAdapter extends ArrayAdapter<String>{
 			imgView = (ImageView) convertView;
 		}
 		
-		if(position >= getCount() - 10) {
+		if(position >= getCount() - 1) {
 			//get some more
 			new PatternsTask(context).execute(position);
 		}

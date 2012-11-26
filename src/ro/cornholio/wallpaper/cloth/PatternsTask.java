@@ -35,7 +35,11 @@ public class PatternsTask extends AsyncTask<Integer, Void, String>{
 			if(ga.gw.getAdapter() == null) {
 				ga.gw.setAdapter(new PatternAdapter(ga, patterns));
 			}else {
-				((PatternAdapter)ga.gw.getAdapter()).addAll(patterns);
+				PatternAdapter pa = (PatternAdapter)ga.gw.getAdapter(); 
+				for(String pattern : patterns) {
+					pa.add(pattern);
+				}
+				
 			}
 			
 		}catch(Exception e) {
