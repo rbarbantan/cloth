@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="rowHeight">48dp</dimen>
+    <dimen name="rowWidth">48dp</dimen>
+    <dimen name="imageHeight">48dp</dimen>
+    <dimen name="imageWidth">48dp</dimen>
+</resources>

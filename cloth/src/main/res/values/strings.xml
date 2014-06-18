@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Cloth</string>
+	<string name="setAsBackground">Set as background</string>
+    <string name="unlock">Unlock pattern pack</string>
+</resources>

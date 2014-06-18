@@ -1,0 +1,21 @@
+<resources>
+    <style name="two_way">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/rowHeight</item>
+    </style>
+
+    <style name="two_way_best" parent="two_way">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_alignParentBottom">true</item>
+    </style>
+
+    <style name="two_way_latest" parent="two_way">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_above">@id/bestList</item>
+    </style>
+
+    <style name="two_way_random" parent="two_way">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_above">@id/latestList</item>
+    </style>
+</resources>

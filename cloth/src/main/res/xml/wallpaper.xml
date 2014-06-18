@@ -1,0 +1,3 @@
+<wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:thumbnail="@drawable/ic_launcher"
+    android:settingsActivity="ro.cornholio.wallpaper.cloth.PatternGallery"/>
