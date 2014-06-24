@@ -84,7 +84,7 @@ public class PatternGallery extends Activity {
             }
         });
         final TwoWayView latestList = (TwoWayView) findViewById(R.id.latestList);
-        ColourLoversClient.getInstance().listPatterns(0,new Callback<List<Pattern>>() {
+        ColourLoversClient.getInstance().listLatestPatterns(0, new Callback<List<Pattern>>() {
             @Override
             public void success(List<Pattern> patterns, Response response) {
                 latestList.setAdapter(new PatternAdapter(PatternGallery.this, patterns, true));
@@ -96,21 +96,13 @@ public class PatternGallery extends Activity {
             }
         });
         final TwoWayView randomList = (TwoWayView) findViewById(R.id.randomList);
-        ColourLoversClient.getInstance().listPatterns(0,new Callback<List<Pattern>>() {
-            @Override
-            public void success(List<Pattern> patterns, Response response) {
-                randomList.setAdapter(new PatternAdapter(PatternGallery.this, patterns, true));
-            }
+        RandomPatternsTask randomPatternsTask = new RandomPatternsTask(this, randomList);
+        randomPatternsTask.execute();
 
-            @Override
-            public void failure(RetrofitError error) {
-                Log.e(TAG, "could not get patterns", error);
-            }
-        });
         AdapterView.OnItemClickListener freeListener = new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final String imageUrl = ((Pattern) bestList.getAdapter().getItem(i)).imageUrl;
+                final String imageUrl = ((Pattern) adapterView.getAdapter().getItem(i)).imageUrl;
                 new DownloadPattern().execute(imageUrl);
                 button.setText(R.string.setAsBackground);
                 button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_action_navigation_accept, 0, 0, 0);
@@ -119,7 +111,7 @@ public class PatternGallery extends Activity {
         AdapterView.OnItemClickListener paidListener = new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final String imageUrl = ((Pattern) bestList.getAdapter().getItem(i)).imageUrl;
+                final String imageUrl = ((Pattern) adapterView.getAdapter().getItem(i)).imageUrl;
                 new DownloadPattern().execute(imageUrl);
                 button.setText(R.string.unlock);
                 button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_device_access_not_secure, 0, 0, 0);
