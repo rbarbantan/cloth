@@ -6,16 +6,32 @@
 
     <style name="two_way_best" parent="two_way">
         <item name="android:orientation">horizontal</item>
+    </style>
+    <style name="rel_best" parent="two_way">
         <item name="android:layout_alignParentBottom">true</item>
     </style>
 
     <style name="two_way_latest" parent="two_way">
         <item name="android:orientation">horizontal</item>
-        <item name="android:layout_above">@id/bestList</item>
+    </style>
+    <style name="rel_latest" parent="two_way">
+        <item name="android:layout_above">@id/bestWrapper</item>
     </style>
 
     <style name="two_way_random" parent="two_way">
         <item name="android:orientation">horizontal</item>
-        <item name="android:layout_above">@id/latestList</item>
     </style>
+    <style name="rel_random" parent="two_way">
+        <item name="android:layout_above">@id/latestWrapper</item>
+    </style>
+
+    <style name="text">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:background">@color/transparent_dark_grey</item>
+        <item name="android:textColor">@color/text</item>
+    </style>
+
 </resources>

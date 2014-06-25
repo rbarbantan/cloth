@@ -6,20 +6,14 @@ import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
 import android.opengl.GLUtils;
 import android.util.Log;
 
 
 public class VerletSystem {
-
+    private final static String TAG = VerletSystem.class.getName();
 	private static final float GRAVITY = -4f;
 	float MASS = 0.01f;
 	public float[] particles;
@@ -58,7 +52,14 @@ public class VerletSystem {
 	private int[] textures = new int[1];
 	float[] meshPositionData;
 	float[] meshNormalData;
-	Vector3D[] faceNormals;
+    float[] a = new float[3];
+    float[] b = new float[3];
+    float[] c = new float[3];
+    float[] d = new float[3];
+    float[] e = new float[3];
+    float[] f = new float[3];
+    float[] g = new float[3];
+    float[] fNormals ;
 
 	public VerletSystem(int width, int height, boolean fixedBottom, int zoom) {
 		this.width = width;
@@ -66,7 +67,7 @@ public class VerletSystem {
 		M = (int) Math.ceil(((float)width/height)*N) + 1;
 		meshPositionData = new float[3*6*(M-1)*(N-1)];
 		meshNormalData = new float[3*6*(M-1)*(N-1)];
-		faceNormals = new Vector3D[2*(N-1)*(M-1)];
+        fNormals = new float[3*2*(N-1)*(M-1)];
 		
 		particles = new float[3 * N * M];
 		int current = 0;
@@ -393,8 +394,7 @@ public class VerletSystem {
 			//Log.d("VerletSystem", "selected: " + selected);
 			int zPos = 3 * selected + 2;
 			if(zPos < particles.length) {
-				particles[3 * selected + 2] -= 0.1f;
-				//particles[3 * selected + 2] = 0f;
+				particles[zPos] -= 0.05f;
 			}
 			
 		}
@@ -437,77 +437,93 @@ public class VerletSystem {
 	
 	public void updateNormals(FloatBuffer meshNormals) {
 		int current = 0;
-		
+
 		for(int i=0; i<N-1; i++) {
 			for(int j=0; j<M-1; j++) {
-				Vector3D p1 = new Vector3D(particles[3*(i*M + j)], particles[3*(i*M + j)+1], particles[3*(i*M + j)+2]);
-				Vector3D p2 = new Vector3D(particles[3*((i+1)*M + j)], particles[3*((i+1)*M + j)+1], particles[3*((i+1)*M + j)+2]);
-				Vector3D p3 = new Vector3D(particles[3*((i+1)*M + j+1)], particles[3*((i+1)*M + j+1)+1], particles[3*((i+1)*M + j+1)+2]);
-				Vector3D p4 = new Vector3D(particles[3*(i*M + j+1)], particles[3*(i*M + j+1)+1], particles[3*(i*M + j+1)+2]);
-				
-				Vector3D u = p3.subtract(p2);
-				Vector3D v = p1.subtract(p2);
-				Vector3D w = p1.subtract(p4);
-				
-				faceNormals[current++] =  u.crossProduct(v);
-				faceNormals[current++] = w.crossProduct(v.negate());
-				
+                put(particles[3*(i*M + j)], particles[3*(i*M + j)+1], particles[3*(i*M + j)+2], a);
+                put(particles[3*((i+1)*M + j)], particles[3*((i+1)*M + j)+1], particles[3*((i+1)*M + j)+2], b);
+                put(particles[3*((i+1)*M + j+1)], particles[3*((i+1)*M + j+1)+1], particles[3*((i+1)*M + j+1)+2], c);
+                put(particles[3*(i*M + j+1)], particles[3*(i*M + j+1)+1], particles[3*(i*M + j+1)+2], d);
+
+                substract(b ,a , e);
+                substract(c, a, f);
+                substract(d, a, g);
+
+                crossProduct(e, f, a);
+                crossProduct(f, g, b);
+
+                fNormals[3*current] = a[0];
+                fNormals[3*current+1] = a[1];
+                fNormals[3*current+2] = a[2];
+                current++;
+
+                fNormals[3*current] = b[0];
+                fNormals[3*current+1] = b[1];
+                fNormals[3*current+2] = b[2];
+                current++;
+
 			}
 		}
-		
 		for(int i=0; i<N; i++) {
 			for(int j=0; j<M; j++) {
-				Vector3D normal = new Vector3D(new double[]{0,0,1});
+				put(0,0,0,a);
 				if(i > 0) {
 					if(j > 0) {
-						normal = normal.add(faceNormals[2*((i-1)*(M-1)+j-1)]);
-						normal = normal.add(faceNormals[2*((i-1)*(M-1)+j-1)+1]);
+                        current = 2*((i-1)*(M-1)+j-1);
+                        add(a, fNormals[3*current],fNormals[3*current+1],fNormals[3*current+2]);
+                        current = 2*((i-1)*(M-1)+j-1)+1;
+                        add(a, fNormals[3*current],fNormals[3*current+1],fNormals[3*current+2]);
 					}
 					if(j < M-1) {
-						normal = normal.add(faceNormals[2*((i-1)*(M-1)+j)]);
+                        current = 2*((i-1)*(M-1)+j);
+                        add(a, fNormals[3*current],fNormals[3*current+1],fNormals[3*current+2]);
 					}
 				}
 				if(i < N-1) {
 					if(j < M-1) {
-						normal = normal.add(faceNormals[2*(i*(M-1)+j)]);
-						normal = normal.add(faceNormals[2*(i*(M-1)+j)+1]);
-					}
+                        current = 2*(i*(M-1)+j);
+                        add(a, fNormals[3*current],fNormals[3*current+1],fNormals[3*current+2]);
+
+                        current = 2*(i*(M-1)+j)+1;
+                        add(a, fNormals[3*current],fNormals[3*current+1],fNormals[3*current+2]);
+                	}
 					if(j > 0) {
-						normal = normal.add(faceNormals[2*(i*(M-1)+j-1)+1]);
+                        current = 2*(i*(M-1)+j-1)+1;
+                        add(a, fNormals[3*current],fNormals[3*current+1],fNormals[3*current+2]);
 					}
 				}
-				normal = normal.normalize();
+                normalize(a, b);
 				if(i > 0) {
 					if(j > 0) {
-						meshNormalData[6*3*((i-1)*(M-1)+j-1)+6] = (float) normal.getX();
-						meshNormalData[6*3*((i-1)*(M-1)+j-1)+7] = (float) normal.getY();
-						meshNormalData[6*3*((i-1)*(M-1)+j-1)+8] = (float) normal.getZ();
+						meshNormalData[6*3*((i-1)*(M-1)+j-1)+6] = b[0];
+						meshNormalData[6*3*((i-1)*(M-1)+j-1)+7] = b[1];
+						meshNormalData[6*3*((i-1)*(M-1)+j-1)+8] = b[2];
 						
-						meshNormalData[6*3*((i-1)*(M-1)+j-1)+12] = (float) normal.getX();
-						meshNormalData[6*3*((i-1)*(M-1)+j-1)+13] = (float) normal.getY();
-						meshNormalData[6*3*((i-1)*(M-1)+j-1)+14] = (float) normal.getZ();
+						meshNormalData[6*3*((i-1)*(M-1)+j-1)+12] = b[0];
+						meshNormalData[6*3*((i-1)*(M-1)+j-1)+13] = b[1];
+						meshNormalData[6*3*((i-1)*(M-1)+j-1)+14] = b[2];
 
 					}
 					if(j < M-1) {
-						meshNormalData[6*3*((i-1)*(M-1)+j)+3] = (float) normal.getX();
-						meshNormalData[6*3*((i-1)*(M-1)+j)+4] = (float) normal.getY();
-						meshNormalData[6*3*((i-1)*(M-1)+j)+5] = (float) normal.getZ();
+						meshNormalData[6*3*((i-1)*(M-1)+j)+3] = b[0];
+						meshNormalData[6*3*((i-1)*(M-1)+j)+4] = b[1];
+						meshNormalData[6*3*((i-1)*(M-1)+j)+5] = b[2];
 					}
 				}
 				if(i < N-1) {
 					if(j < M-1) {
-						meshNormalData[6*3*(i*(M-1)+j)] = (float) normal.getX();
-						meshNormalData[6*3*(i*(M-1)+j)+1] = (float) normal.getY();
-						meshNormalData[6*3*(i*(M-1)+j)+2] = (float) normal.getZ();
+						meshNormalData[6*3*(i*(M-1)+j)] = b[0];
+						meshNormalData[6*3*(i*(M-1)+j)+1] = b[1];
+						meshNormalData[6*3*(i*(M-1)+j)+2] = b[2];
 						
-						meshNormalData[6*3*(i*(M-1)+j)+9] = (float) normal.getX();
-						meshNormalData[6*3*(i*(M-1)+j)+10] = (float) normal.getY();
-						meshNormalData[6*3*(i*(M-1)+j)+11] = (float) normal.getZ();
+						meshNormalData[6*3*(i*(M-1)+j)+9] = b[0];
+						meshNormalData[6*3*(i*(M-1)+j)+10] = b[1];
+						meshNormalData[6*3*(i*(M-1)+j)+11] = b[2];
 					}
 					if(j > 0) {
-						meshNormalData[6*3*(i*(M-1)+j-1)+15] = (float) normal.getX();
-						meshNormalData[6*3*(i*(M-1)+j-1)+16] = (float) normal.getY();
-						meshNormalData[6*3*(i*(M-1)+j-1)+17] = (float) normal.getZ();
+						meshNormalData[6*3*(i*(M-1)+j-1)+15] = b[0];
+						meshNormalData[6*3*(i*(M-1)+j-1)+16] = b[1];
+						meshNormalData[6*3*(i*(M-1)+j-1)+17] = b[2];
 
 					}
 				}
@@ -515,5 +531,48 @@ public class VerletSystem {
 		}
 		meshNormals.put(meshNormalData);
         meshNormals.position(0);
-	} 
+	}
+
+    private void add(float[] a, float[] b, float[] result) {
+        result[0] = a[0] + b[0];
+        result[1] = a[1] + b[1];
+        result[2] = a[2] + b[2];
+    }
+
+    private void substract(float[] a, float[] b, float[] result) {
+        result[0] = a[0] - b[0];
+        result[1] = a[1] - b[1];
+        result[2] = a[2] - b[2];
+    }
+
+    private void crossProduct(float[] a, float[] b, float[] result) {
+        result[0] = a[1]*b[2] - a[2]*b[1];
+        result[1] = a[2]*b[0] - a[0]*b[2];
+        result[2] = a[0]*b[1] - a[1]*b[0];
+    }
+
+    private void negate(float[] source, float[] dest) {
+        dest[0] = -source[0];
+        dest[1] = -source[1];
+        dest[2] = -source[2];
+    }
+
+    private void put(float x, float y, float z, float[] dest) {
+        dest[0] = x;
+        dest[1] = y;
+        dest[2] = z;
+    }
+
+    private void add(float[] target, float x, float y, float z) {
+        target[0]+=x;
+        target[1]+=y;
+        target[2]+=z;
+    }
+
+    private void normalize(float[] source, float[] target) {
+        float len = (float) Math.sqrt(source[0]*source[0] + source[1]*source[1] + source[2]*source[2]);
+        target[0] = (len == 0) ? 0 : source[0]/len;
+        target[1] = (len == 0) ? 0 : source[1]/len;
+        target[2] = (len == 0) ? 0 : source[2]/len;
+    }
 }

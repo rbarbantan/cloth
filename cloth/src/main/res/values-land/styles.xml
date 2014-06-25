@@ -1,5 +1,6 @@
 <resources>
 
+
     <style name="two_way">
         <item name="android:layout_width">@dimen/rowWidth</item>
         <item name="android:layout_height">match_parent</item>
@@ -8,17 +9,33 @@
 
     <style name="two_way_best" parent="two_way">
         <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="rel_best" parent="two_way">
         <item name="android:layout_alignParentLeft">true</item>
     </style>
 
     <style name="two_way_latest" parent="two_way">
         <item name="android:orientation">vertical</item>
-        <item name="android:layout_toRightOf">@id/bestList</item>
+    </style>
+    <style name="rel_latest" parent="two_way">
+        <item name="android:layout_toRightOf">@id/bestWrapper</item>
     </style>
 
     <style name="two_way_random" parent="two_way">
         <item name="android:orientation">vertical</item>
-        <item name="android:layout_toRightOf">@id/latestList</item>
+    </style>
+    <style name="rel_random" parent="two_way">
+        <item name="android:layout_toRightOf">@id/latestWrapper</item>
+    </style>
+
+    <style name="text">
+        <item name="android:layout_width">@dimen/rowWidth</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:background">@color/transparent_dark_grey</item>
+        <item name="android:textColor">@color/text</item>
     </style>
 
 </resources>

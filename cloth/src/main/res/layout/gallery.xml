@@ -22,14 +22,33 @@
         android:paddingLeft="8dp"
         android:onClick="setPattern"/>
 
-    <org.lucasr.twowayview.TwoWayView
-        android:id="@+id/bestList"
-        style="@style/two_way_best"/>
-    <org.lucasr.twowayview.TwoWayView
-        android:id="@+id/latestList"
-        style="@style/two_way_latest"/>
-    <org.lucasr.twowayview.TwoWayView
-        android:id="@+id/randomList"
-        style="@style/two_way_random"/>
+    <RelativeLayout android:id="@+id/bestWrapper"
+        style="@style/rel_best">
+        <org.lucasr.twowayview.TwoWayView
+            android:id="@+id/bestList"
+            style="@style/two_way_best"/>
+        <TextView style="@style/text"
+            android:text="Best"/>
+    </RelativeLayout>
+
+    <RelativeLayout android:id="@+id/latestWrapper"
+        style="@style/rel_latest">
+        <org.lucasr.twowayview.TwoWayView
+            android:id="@+id/latestList"
+            style="@style/two_way_latest"/>
+        <TextView
+            style="@style/text"
+            android:text="Latest"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        style="@style/rel_random">
+        <org.lucasr.twowayview.TwoWayView
+            android:id="@+id/randomList"
+            style="@style/two_way_random"/>
+        <TextView
+            style="@style/text"
+            android:text="Random"/>
+    </RelativeLayout>
 
 </RelativeLayout>

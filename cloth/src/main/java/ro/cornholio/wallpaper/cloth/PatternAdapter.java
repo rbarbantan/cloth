@@ -74,6 +74,7 @@ public class PatternAdapter extends BaseAdapter {
         }else {
             result = (ImageView) view;
         }
+        result.setImageResource(R.drawable.cloth_logo);
         DownloadAndSetPattern task = new DownloadAndSetPattern(result);
         task.execute(getItem(i).imageUrl);
         return result;

@@ -350,7 +350,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         
         // Calculate position of the light. Rotate and then push into the distance.
         Matrix.setIdentityM(mLightModelMatrix, 0);
-        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 9.0f, -4.0f);      
+        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 9.0f, -4.0f);
         //Matrix.rotateM(mLightModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
         //Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 2.0f);
                
@@ -358,7 +358,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);                        
         
         Matrix.setIdentityM(mLightModelMatrix2, 0);
-        Matrix.translateM(mLightModelMatrix2, 0, 0.0f, -9.0f, -1.0f);      
+        Matrix.translateM(mLightModelMatrix2, 0, 0.0f, -9.0f, -0.0f);
                
         Matrix.multiplyMV(mLightPosInWorldSpace2, 0, mLightModelMatrix2, 0, mLightPosInModelSpace2, 0);
         Matrix.multiplyMV(mLightPosInEyeSpace2, 0, mViewMatrix, 0, mLightPosInWorldSpace2, 0); 
