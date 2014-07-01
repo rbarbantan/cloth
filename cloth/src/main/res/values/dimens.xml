@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="rowHeight">64dp</dimen>
-    <dimen name="rowWidth">64dp</dimen>
-    <dimen name="imageHeight">64dp</dimen>
-    <dimen name="imageWidth">64dp</dimen>
+    <dimen name="rowHeight">128dp</dimen>
+    <dimen name="rowWidth">128dp</dimen>
+    <dimen name="imageHeight">128dp</dimen>
+    <dimen name="imageWidth">128dp</dimen>
 </resources>

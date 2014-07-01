@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.opengl.GLSurfaceView
+        android:id="@+id/clothView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <org.lucasr.twowayview.TwoWayView
+        android:id="@+id/list"
+        style="@style/two_way"/>
+</RelativeLayout>

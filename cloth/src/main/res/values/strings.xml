@@ -2,4 +2,11 @@
     <string name="app_name">Cloth</string>
 	<string name="setAsBackground">Set as background</string>
     <string name="unlock">Unlock pattern pack</string>
+    <string name="opengl">OpenGL 2.0 is needed !</string>
+
+    <string-array name="pattern_sources">
+        <item>Popular</item>
+        <item>Recent</item>
+        <item>Random</item>
+    </string-array>
 </resources>

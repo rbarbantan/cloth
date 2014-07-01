@@ -4,29 +4,8 @@
     <style name="two_way">
         <item name="android:layout_width">@dimen/rowWidth</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_below">@id/set_button</item>
-    </style>
-
-    <style name="two_way_best" parent="two_way">
         <item name="android:orientation">vertical</item>
-    </style>
-
-    <style name="rel_best" parent="two_way">
         <item name="android:layout_alignParentLeft">true</item>
-    </style>
-
-    <style name="two_way_latest" parent="two_way">
-        <item name="android:orientation">vertical</item>
-    </style>
-    <style name="rel_latest" parent="two_way">
-        <item name="android:layout_toRightOf">@id/bestWrapper</item>
-    </style>
-
-    <style name="two_way_random" parent="two_way">
-        <item name="android:orientation">vertical</item>
-    </style>
-    <style name="rel_random" parent="two_way">
-        <item name="android:layout_toRightOf">@id/latestWrapper</item>
     </style>
 
     <style name="text">
