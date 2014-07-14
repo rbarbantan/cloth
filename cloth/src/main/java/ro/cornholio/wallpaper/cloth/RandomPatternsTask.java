@@ -35,6 +35,6 @@ public class RandomPatternsTask extends AsyncTask<Void, Void, List<Pattern>> {
 
     @Override
     protected void onPostExecute(List<Pattern> patterns) {
-        view.setAdapter(new PatternAdapter(context, patterns, true));
+        ((PatternAdapter)view.getAdapter()).addAll(patterns);
     }
 }

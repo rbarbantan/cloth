@@ -34,6 +34,7 @@
                 android:name="android.service.wallpaper"
                 android:resource="@xml/wallpaper" />
         </service>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="6921073d5157b766d7160e9268e385ca6669c3f8"/>
     </application>
 
 </manifest>

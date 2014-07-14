@@ -1,5 +1,6 @@
 package ro.cornholio.wallpaper.cloth.render;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,10 +11,10 @@ import java.util.Vector;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import ro.cornholio.wallpaper.cloth.R;
 import ro.cornholio.wallpaper.cloth.physics.VerletSystem;
+import ro.cornholio.wallpaper.cloth.util.FileUtil;
 import ro.cornholio.wallpaper.cloth.util.RawResourceReader;
 import ro.cornholio.wallpaper.cloth.util.ShaderHelper;
 import ro.cornholio.wallpaper.cloth.util.TextureHelper;
@@ -232,6 +233,11 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 
         } catch (FileNotFoundException e) {
             Log.e(TAG, "could not find cached pattern", e);
+            String patternUrl = PreferenceManager.getDefaultSharedPreferences(mActivityContext).getString("pattern",null);
+            if(patternUrl != null){
+                DownloadPattern task = new DownloadPattern();
+                task.execute(patternUrl);
+            }
         }
 
         if (bitmap != null) {
@@ -283,39 +289,43 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 				.order(ByteOrder.nativeOrder()).asFloatBuffer();
 		mMeshTextureCoordinates.put(meshTextureCoordinateData).position(0);
 	
-		int zoom = 8;
+		int zoom = PreferenceManager.getDefaultSharedPreferences(mActivityContext).getInt("zoom", 4);
 		verlet = new VerletSystem(width,height, true, zoom);
-		
-		float dx = zoom;//(float)zoom/(M-1);
-		float dy = zoom;//(float)zoom/(N-1);
-		
-		int current = 0;
-		for(float i=0; i<N-1; i++) {
-			for(float j=0; j<M-1; j++) {
-				
-				meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
-				meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
-				
-				meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
-				meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
-				
-				meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
-				meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
-				
-				meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
-				meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
-				
-				meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
-				meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
-				
-				meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
-				meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
-				
-			}
-		}
-	}	
 
-	@Override
+        setZoom(zoom);
+	}
+
+    public void setZoom(int zoom) {
+        float dx = zoom;//(float)zoom/(M-1);
+        float dy = zoom;//(float)zoom/(N-1);
+
+        int current = 0;
+        for(float i=0; i<N-1; i++) {
+            for(float j=0; j<M-1; j++) {
+
+                meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
+
+                meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
+
+                meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
+
+                meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
+
+                meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
+
+                meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
+
+            }
+        }
+    }
+
+    @Override
 	public void onDrawFrame(GL10 glUnused) 
 	{
 		long start = System.currentTimeMillis();
@@ -367,9 +377,9 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, 6.0f, -5.0f);
         //Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
-        if((int)(Math.random()*20) == 5){
-        	verlet.touch((int)(Math.random()*500), (int)(Math.random()*500));
-        }
+        /*if((int)(Math.random()*20) == 5){
+        	verlet.touch((int)(Math.random()*500), (int)(Math.random()*200), 0.05f);
+        }*/
         verlet.timeStep();
         drawMesh();
         
@@ -405,7 +415,13 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         //long end = System.currentTimeMillis();
         //Log.d(TAG,  "rendered frame in : " + (end - start));
 	}				
-	
+
+    public void touch(float x, float y){
+        //Log.d(TAG, "touched at " +x+","+y+" " + verlet);
+        if(verlet!= null) {
+            verlet.touch(x,y, 0.07f);
+        }
+    }
 	/**
 	 * Draws a mesh.
 	 */			
@@ -485,4 +501,25 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 		// Draw the point.
 		GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1);
 	}*/
+
+    class DownloadPattern extends AsyncTask<String, Void, Bitmap> {
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            Bitmap result = null;
+            try {
+                result = Picasso.with(mActivityContext).load(strings[0]).resize(512,512).get();
+                FileUtil.saveBitmap(result, mActivityContext);
+            } catch (IOException e) {
+                Log.e(TAG, "could not download pattern", e);
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(final Bitmap bitmap) {
+            Bitmap pattern = Bitmap.createBitmap(bitmap);
+            updateTexture(pattern);
+        }
+    }
 }

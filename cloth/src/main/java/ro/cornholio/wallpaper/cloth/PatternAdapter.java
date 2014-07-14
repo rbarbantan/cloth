@@ -91,6 +91,13 @@ public class PatternAdapter extends BaseAdapter {
         return result;
     }
 
+    public void addAll(List<Pattern> newItems) {
+        if(patterns != null) {
+            patterns.addAll(newItems);
+            notifyDataSetChanged();
+        }
+    }
+
     class DownloadAndSetPattern extends AsyncTask<String, Void, Bitmap> {
 
         private ImageView imgView;

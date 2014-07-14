@@ -25,6 +25,7 @@ public class VerletSystem {
 	private float[] colors;
 	private boolean[] fixed;
 	private float[] gravity;
+    private float[] wind;
 
 	int ITERATIONS = 2;
 	float timestep = 0.6f;
@@ -131,7 +132,7 @@ public class VerletSystem {
 			colors[4*i+3] = 1f;
 		}
 		float ratio = (float)width/height;
-		Log.d("x","ratio" +ratio);
+		Log.d(TAG,"ratio" +ratio);
 		float dx = 0;
 		float dy = 0;
 		if(ratio < 1) {
@@ -153,6 +154,7 @@ public class VerletSystem {
 		
 		float g = fixedBottom ? 0 : GRAVITY;
 		gravity = new float[] {0, g, 0};
+        wind = new float[] {0f,0.01f,-0.01f};
 		forces = new float[particles.length];
 		masses = new float[N*M];
 		for(int i=0;i<N*M;i++) {
@@ -204,9 +206,9 @@ public class VerletSystem {
 	protected void accumulateForces() {
 		// gravity
 		for (int i = 0; i < particles.length; i += 3) {
-			forces[i] = (gravity[0] * masses[i / 3]); 
-			forces[i + 1] = (gravity[1] * masses[i / 3]);
-			forces[i + 2] = (gravity[2] * masses[i / 3]);
+			forces[i] = (gravity[0] * masses[i / 3]) + (float)(wind[0]*Math.random());
+			forces[i + 1] = (gravity[1] * masses[i / 3]) + (float)(wind[1]*Math.random());
+			forces[i + 2] = (gravity[2] * masses[i / 3]) + (float)(wind[2]*Math.random());
 		}
 	}
 
@@ -384,17 +386,19 @@ public class VerletSystem {
 		return result;
 	}
 	
-	public void touch(float x, float y) {
+	public void touch(float x, float y, float intensity) {
+        //Log.d(TAG, "touched at " +x+","+y+" " + intensity);
 		if(width != 0 && height != 0) {
 			int column = (int)(x * M / width);
 			int row = (int)(y * N / height);
-			//Log.d("VerletSystem", "touched: " + column + "," + row);
+			//Log.d(TAG, "touched: " + column + "," + row);
 			int selected = row * M + column;
 			// fixed[selected] = true;
-			//Log.d("VerletSystem", "selected: " + selected);
+			//Log.d(TAG, "selected: " + selected);
 			int zPos = 3 * selected + 2;
 			if(zPos < particles.length) {
-				particles[zPos] -= 0.05f;
+                //Log.d(TAG, "moving: " + zPos);
+				particles[zPos] -= intensity;//0.05f;
 			}
 			
 		}

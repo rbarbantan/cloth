@@ -3,25 +3,49 @@ package ro.cornholio.wallpaper.cloth;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
+import com.crashlytics.android.Crashlytics;
+
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
 import ro.cornholio.wallpaper.cloth.render.ClothRenderer;
+import ro.cornholio.wallpaper.cloth.util.DebugUtils;
 
 /**
  * Created by rares on 6/11/2014.
  */
 public abstract class OpenGLES2WallpaperService extends GLWallpaperService {
+    private static final String TAG = OpenGLES2WallpaperService.class.getName();
+
     @Override
     public Engine onCreateEngine() {
         return new OpenGLES2Engine();
     }
 
     class OpenGLES2Engine extends GLEngine {
+        private ClothRenderer renderer;
+
+        public OpenGLES2Engine() {
+            super();
+            setTouchEventsEnabled(true);
+        }
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+            if(!DebugUtils.isDebuggable(getApplicationContext())) {
+                Crashlytics.start(getApplicationContext());
+            }
 
             // Check if the system supports OpenGL ES 2.0.
             final ActivityManager activityManager =
@@ -39,15 +63,31 @@ public abstract class OpenGLES2WallpaperService extends GLWallpaperService {
                 // On Honeycomb+ devices, this improves the performance when
                 // leaving and resuming the live wallpaper.
                 setPreserveEGLContextOnPause(true);
-
+                renderer = (ClothRenderer) getNewRenderer();
                 // Set the renderer to our user-defined renderer.
-                setRenderer(getNewRenderer());
+                setRenderer(renderer);
             }
             else
             {
                 // This is where you could create an OpenGL ES 1.x compatible
                 // renderer if you wanted to support both ES 1 and ES 2.
                 return;
+            }
+        }
+
+        @Override
+        protected void setRenderer(GLSurfaceView.Renderer renderer) {
+            super.setRenderer(renderer);
+            if(renderer instanceof ClothRenderer){
+                this.renderer = (ClothRenderer) renderer;
+            }
+        }
+
+        @Override
+        public void onTouchEvent(MotionEvent event) {
+            //Log.d(TAG, "ontouchevent");
+            if(event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+                renderer.touch(event.getX(), event.getY());
             }
         }
     }
