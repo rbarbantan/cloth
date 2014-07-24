@@ -1,53 +1,37 @@
 package ro.cornholio.wallpaper.cloth;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.opengl.GLSurfaceView;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.ParcelFileDescriptor;
-import android.preference.PreferenceManager;
-import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-
-import org.lucasr.twowayview.TwoWayView;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
-import ro.cornholio.wallpaper.cloth.R;
-import ro.cornholio.wallpaper.cloth.api.ColourLoversClient;
-import ro.cornholio.wallpaper.cloth.render.ClothRenderer;
 import ro.cornholio.wallpaper.cloth.util.IabHelper;
 import ro.cornholio.wallpaper.cloth.util.IabResult;
 import ro.cornholio.wallpaper.cloth.util.Inventory;
@@ -65,11 +49,14 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
     private final static int REQUEST_CODE = 1892;
     private boolean isPremium = false;
     private boolean needsPremium = false;
+    private MenuItem searchMenu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.gallery);
+        handleIntent(getIntent());
 
         SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this,
                 R.array.pattern_sources, R.layout.spinner_item);
@@ -81,11 +68,11 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
                 needsPremium = i > 0;
                 invalidateOptionsMenu();
 
-                if(i==2) {
-                    Intent intent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(intent, IMAGE_PICKER_SELECT);
-                }
-                PatternFragment fragment = PatternFragment.newInstance(i);
+                //if(i==2) {
+                //    Intent intent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                //    startActivityForResult(intent, IMAGE_PICKER_SELECT);
+                //}
+                PatternFragment fragment = PatternFragment.newInstance(SourceType.values()[i], isPremium);
                 getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
                 return false;
             }
@@ -117,8 +104,31 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
         });
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            ((PatternFragment)getSupportFragmentManager().findFragmentById(R.id.container)).search(query, true);
+        }
+        if(searchMenu != null) {
+            MenuItemCompat.collapseActionView(searchMenu);
+        }
+    }
     private String getPlayPublicKey() {
-        return "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqnnY0FyW9VNE/0jXEpm2OkYN9cUSUf4IZNHb6qHrgsAt9asWmRfI8GFSdFa+csZm1IuVXzge3PNbSmQshnUb2kU4oEHDcqKzi9cDHH1lc+GoDRoWKV/GhHnVJOX6ah3OO/eAe0TOlw7askwt+OhTbv8YqNRdOiowsD2rg2nzmQTm3lnBJjfTN6FYSZBcrSO+z+fPkE3JOeeDQNK946u3TYnc6sd4HLmSHfr7bqM7cSrWI1fqXtAftOSlVPak+VJvFU5DSHBHCBibEfW6gKkh3MxJ5NEmafqMXfUuiDgy6cMPmum0BaKGXqFZ/ksgrNoTEHWnpTl7DsWisITla0wQ+wIDAQAB";
+        String[] key_parts = getResources().getStringArray(R.array.play_key);
+        StringBuffer key = new StringBuffer();
+        for(int i=0; i<key_parts.length; i++) {
+            if(i%2 == 1){
+                key.append(key_parts[i]);
+            }
+        }
+        return key.toString();
+        //return "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqnnY0FyW9VNE/0jXEpm2OkYN9cUSUf4IZNHb6qHrgsAt9asWmRfI8GFSdFa+csZm1IuVXzge3PNbSmQshnUb2kU4oEHDcqKzi9cDHH1lc+GoDRoWKV/GhHnVJOX6ah3OO/eAe0TOlw7askwt+OhTbv8YqNRdOiowsD2rg2nzmQTm3lnBJjfTN6FYSZBcrSO+z+fPkE3JOeeDQNK946u3TYnc6sd4HLmSHfr7bqM7cSrWI1fqXtAftOSlVPak+VJvFU5DSHBHCBibEfW6gKkh3MxJ5NEmafqMXfUuiDgy6cMPmum0BaKGXqFZ/ksgrNoTEHWnpTl7DsWisITla0wQ+wIDAQAB";
     }
 
     private Bitmap getBitmapFromUri(Uri uri) throws IOException {
@@ -134,6 +144,16 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchMenu = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) searchMenu.getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(true);
+        searchView.setSubmitButtonEnabled(true);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -141,6 +161,7 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.findItem(R.id.set).setVisible(!needsPremium || isPremium);
         menu.findItem(R.id.buy).setVisible(needsPremium && !isPremium);
+        menu.findItem(R.id.search).setVisible(getActionBar().getSelectedNavigationIndex()>0);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -193,6 +214,10 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
 
     private void updateUi() {
         invalidateOptionsMenu();
+        PatternFragment fragment = ((PatternFragment)getSupportFragmentManager().findFragmentById(R.id.container));
+        if(fragment != null){
+            fragment.updateUI(isPremium);
+        }
     }
 
     IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
@@ -214,6 +239,7 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
 
             isPremium = true;
             updateUi();
+            ((PatternFragment)getSupportFragmentManager().findFragmentById(R.id.container)).updateUI(isPremium);
 
         }
     };
@@ -242,7 +268,7 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
             // perform any handling of activity results not related to in-app
             // billing...
             super.onActivityResult(requestCode, resultCode, data);
-            if (requestCode == IMAGE_PICKER_SELECT && resultCode == Activity.RESULT_OK) {
+            /*if (requestCode == IMAGE_PICKER_SELECT && resultCode == Activity.RESULT_OK) {
                 Bitmap bitmap = null;//getBitmapFromCameraData(data, this);
                 try {
                     bitmap = getBitmapFromUri(data.getData());
@@ -250,7 +276,7 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
                     Log.d(TAG, "could not get bitmap");
                 }
                 Log.d(TAG, "bitmap " + bitmap.getWidth());
-            }
+            }*/
         }
         else {
             Log.d(TAG, "onActivityResult handled by IABUtil.");

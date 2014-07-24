@@ -3,6 +3,8 @@ package ro.cornholio.wallpaper.cloth;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,9 +15,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.lucasr.twowayview.TwoWayView;
 
@@ -38,22 +46,26 @@ public class PatternFragment extends Fragment{
     private static final String TAG = PatternFragment.class.getName();
     private static final String TYPE = "type";
     private static final int MIN_ZOOM = 4;
+    private static final String IS_PREMIUM = "is_premium";
     TwoWayView patternList;
     PatternAdapter adapter;
     PatternObserver observer;
     private GLSurfaceView clothView;
+    private ProgressBar progressBar;
     private ClothRenderer renderer;
     private Bitmap pattern;
-    private int listType;
+    private SourceType listType;
     private int current;
     private String patternUrl;
-
     private int zoom=MIN_ZOOM;
+    private String query;
+    private AdView adView;
 
-    public static PatternFragment newInstance(int type){
+    public static PatternFragment newInstance(SourceType type, boolean isPremium){
         PatternFragment fragment = new PatternFragment();
         Bundle args = new Bundle();
-        args.putInt(TYPE, type);
+        args.putString(TYPE, type.name());
+        args.putBoolean(IS_PREMIUM, isPremium);
         fragment.setArguments(args);
         return fragment;
     }
@@ -62,7 +74,8 @@ public class PatternFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.pattern_fragment, container, false);
         patternList = (TwoWayView) root.findViewById(R.id.list);
-        patternList.setOnScrollListener(scrollListener);
+        adView = (AdView) root.findViewById(R.id.adView);
+        progressBar = (ProgressBar) root.findViewById(R.id.progressBar);
         clothView = (GLSurfaceView) root.findViewById(R.id.clothView);
         clothView.setEGLContextClientVersion(2);
         renderer = new ClothRenderer(getActivity());
@@ -75,7 +88,6 @@ public class PatternFragment extends Fragment{
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 final int newVal = i/25;
                 if(zoom != newVal) {
-                    Log.d(TAG, "update to " + newVal);
                     clothView.queueEvent(new Runnable() {
                         @Override
                         public void run() {
@@ -97,22 +109,30 @@ public class PatternFragment extends Fragment{
             }
         });
 
-        listType = getArguments().getInt(TYPE);
+        listType = SourceType.valueOf(getArguments().getString(TYPE));
         current = 0;
-        adapter = new PatternAdapter(getActivity(), new ArrayList<Pattern>(), listType>0);
+        adapter = new PatternAdapter(getActivity(),R.layout.pattern, new ArrayList<Pattern>(), listType!= SourceType.Featured);
         patternList.setAdapter(adapter);
         switch (listType){
-            case 0:
+            case Featured:
                 patternList.setOnItemClickListener(freeListener);
                 break;
-            case 1:
+            default:
                 patternList.setOnItemClickListener(paidListener);
-                break;
-            case 2:
-                patternList.setOnItemClickListener(paidListener);
+                patternList.setOnScrollListener(scrollListener);
                 break;
         }
-        getPatterns();
+        getPatterns(true);
+        updateUI(getArguments().getBoolean(IS_PREMIUM));
+        // Get tracker.
+        Tracker t = ((ClothApplication) getActivity().getApplication()).getTracker();
+
+        // Set screen name.
+        // Where path is a String representing the screen name.
+        t.setScreenName(listType.toString());
+
+        // Send a screen view.
+        t.send(new HitBuilders.AppViewBuilder().build());
         return root;
     }
 
@@ -124,14 +144,37 @@ public class PatternFragment extends Fragment{
         }
     }
 
-    private void getPatterns(){
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adView != null) {
+            adView.resume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        if (adView != null) {
+            adView.pause();
+        }
+        super.onPause();
+    }
+
+    private void getPatterns(final boolean cleanSearch){
+        progressBar.setVisibility(View.VISIBLE);
         Callback<List<Pattern>> callback = new Callback<List<Pattern>>() {
             @Override
             public void success(List<Pattern> patterns, Response response) {
                 if(isAdded()){
-                    current += patterns.size();
-                    adapter.addAll(patterns);
+                    if(cleanSearch) {
+                        current = patterns.size();
+                        adapter.setPatterns(patterns);
+                    }else {
+                        current += patterns.size();
+                        adapter.addAll(patterns);
+                    }
                 }
+                progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -141,24 +184,50 @@ public class PatternFragment extends Fragment{
         };
 
         switch (listType){
-            case 0:
-                ColourLoversClient.getInstance().listPatterns(current,callback);
+            case Featured:
+                getFeatured();
                 break;
-            case 1:
-                ColourLoversClient.getInstance().listLatestPatterns(current,callback);
+            case Popular:
+                ColourLoversClient.getInstance().listTopPatterns(this.query, current, callback);
                 break;
-            case 2:
-                RandomPatternsTask randomPatternsTask = new RandomPatternsTask(getActivity(), patternList);
-                randomPatternsTask.execute();
+            case Recent:
+                ColourLoversClient.getInstance().listLatestPatterns(this.query, current,callback);
                 break;
         }
+    }
+
+    public void updateUI(boolean isPremium){
+        Log.d(TAG, "updating " + isPremium);
+        if(adView != null) {
+            if(!isPremium) {
+                AdRequest adRequest = new AdRequest.Builder()
+                        .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                        //.addTestDevice("INSERT_YOUR_HASHED_DEVICE_ID_HERE")
+                        .build();
+                adView.loadAd(adRequest);
+            }else {
+                adView.pause();
+                adView.setVisibility(View.GONE);
+            }
+        }
+    }
+    private void getFeatured() {
+        String[] featured = getActivity().getResources().getStringArray(R.array.featured);
+        List<Pattern> newPatterns = new ArrayList<Pattern>();
+        for(String f : featured) {
+            Pattern p = new Pattern();
+            p.imageUrl = f;
+            newPatterns.add(p);
+        }
+        adapter.addAll(newPatterns);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     AdapterView.OnItemClickListener freeListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             final String imageUrl = ((Pattern) adapterView.getAdapter().getItem(i)).imageUrl;
-            new DownloadPattern().execute(imageUrl);
+            Picasso.with(getActivity()).load(imageUrl).resize(512,512).into(target);
             observer.itemSelected(false);
 
         }
@@ -167,36 +236,34 @@ public class PatternFragment extends Fragment{
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             final String imageUrl = ((Pattern) adapterView.getAdapter().getItem(i)).imageUrl;
-            new DownloadPattern().execute(imageUrl);
+            Picasso.with(getActivity()).load(imageUrl).resize(512,512).into(target);
             observer.itemSelected(true);
         }
     };
 
-    class DownloadPattern extends AsyncTask<String, Void, Bitmap> {
-
+    private Target target = new Target() {
         @Override
-        protected Bitmap doInBackground(String... strings) {
-            Bitmap result = null;
-            try {
-                patternUrl = strings[0];
-                result = Picasso.with(getActivity()).load(patternUrl).resize(512,512).get();
-            } catch (IOException e) {
-                Log.e(TAG, "could not download pattern", e);
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(final Bitmap bitmap) {
-            pattern = Bitmap.createBitmap(bitmap);
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            pattern = bitmap.copy(bitmap.getConfig(), true);
             clothView.queueEvent(new Runnable() {
                 @Override
                 public void run() {
-                    renderer.updateTexture(bitmap);
+                    renderer.updateTexture(pattern);
                 }
             });
         }
-    }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
+
 
     public void setPattern() {
         if(pattern != null) {
@@ -207,6 +274,12 @@ public class PatternFragment extends Fragment{
         editor.putString("pattern", patternUrl);
         editor.commit();
     }
+
+    public void search(String query, boolean cleanSearch){
+        this.query = query;
+        getPatterns(cleanSearch);
+    }
+
     public interface PatternObserver {
         void itemSelected(boolean paid);
     }
@@ -217,7 +290,7 @@ public class PatternFragment extends Fragment{
         public void onScrollStateChanged(TwoWayView twoWayView, int scrollState) {
             if(scrollState == SCROLL_STATE_IDLE) {
                 if(twoWayView.getLastVisiblePosition() >= twoWayView.getCount() - threshold) {
-                    getPatterns();
+                    getPatterns(false);
                 }
             }
         }

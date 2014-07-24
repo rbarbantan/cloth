@@ -6,17 +6,4 @@
 <FrameLayout android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>
-    <!--<Button
-        android:id="@+id/set_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:drawableLeft="@drawable/ic_action_navigation_accept"
-        android:background="@drawable/transparent_button"
-        android:gravity="left|center_vertical"
-        android:text="@string/setAsBackground"
-        android:textColor="@color/text"
-        android:drawablePadding="8dp"
-        android:paddingLeft="8dp"
-        android:onClick="setPattern"/>-->
 </RelativeLayout>

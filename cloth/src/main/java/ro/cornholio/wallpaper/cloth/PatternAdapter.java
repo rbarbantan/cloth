@@ -14,6 +14,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
@@ -25,7 +26,7 @@ import java.util.List;
 /**
  * Created by rares on 6/10/2014.
  */
-public class PatternAdapter extends BaseAdapter {
+public class PatternAdapter extends ArrayAdapter<Pattern> {
     private static final String TAG = PatternAdapter.class.getName();
     private List<Pattern> patterns;
     private Context context;
@@ -35,7 +36,8 @@ public class PatternAdapter extends BaseAdapter {
     private Paint overlayPaint;
     int patternSizePx;
 
-    public PatternAdapter(Context context, List<Pattern> patterns, boolean locked) {
+    public PatternAdapter(Context context, int resource, List<Pattern> patterns, boolean locked) {
+        super(context, resource, patterns);
         this.patterns = patterns;
         this.context = context;
         this.locked = locked;
@@ -74,9 +76,10 @@ public class PatternAdapter extends BaseAdapter {
         }else {
             result = (ImageView) view;
         }
-        result.setImageResource(R.drawable.cloth_logo);
-        DownloadAndSetPattern task = new DownloadAndSetPattern(result);
-        task.execute(getItem(i).imageUrl);
+        //result.setImageResource(R.drawable.cloth_logo);
+        Picasso.with(context).load(getItem(i).imageUrl).placeholder(R.drawable.cloth_logo).resize(patternSizePx,patternSizePx).into(result);
+        //DownloadAndSetPattern task = new DownloadAndSetPattern(result);
+        //task.execute(getItem(i).imageUrl);
         return result;
     }
 
@@ -96,6 +99,15 @@ public class PatternAdapter extends BaseAdapter {
             patterns.addAll(newItems);
             notifyDataSetChanged();
         }
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public void setPatterns(List<Pattern> patterns) {
+        this.patterns = patterns;
+        notifyDataSetChanged();
     }
 
     class DownloadAndSetPattern extends AsyncTask<String, Void, Bitmap> {

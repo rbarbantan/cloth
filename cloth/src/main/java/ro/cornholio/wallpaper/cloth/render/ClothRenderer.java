@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -31,6 +32,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 /**
  * This class implements our custom renderer. Note that the GL10 parameter passed in is unused for OpenGL ES 2.0
@@ -219,7 +221,8 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 	}
 
     public void updateTexture(Bitmap pattern) {
-        mTextureDataHandle = TextureHelper.loadTexture(mActivityContext, pattern);
+        mTextureDataHandle = TextureHelper.loadTexture(mActivityContext, pattern.copy(pattern.getConfig(),true));
+        //pattern.recycle();
     }
 		
 	@Override
@@ -235,8 +238,9 @@ public class ClothRenderer implements GLSurfaceView.Renderer
             Log.e(TAG, "could not find cached pattern", e);
             String patternUrl = PreferenceManager.getDefaultSharedPreferences(mActivityContext).getString("pattern",null);
             if(patternUrl != null){
-                DownloadPattern task = new DownloadPattern();
-                task.execute(patternUrl);
+                //DownloadPattern task = new DownloadPattern();
+                //task.execute(patternUrl);
+                Picasso.with(mActivityContext).load(patternUrl).resize(512,512).into(target);
             }
         }
 
@@ -502,6 +506,26 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 		GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1);
 	}*/
 
+    private Target target = new Target() {
+
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            Bitmap pattern = Bitmap.createBitmap(bitmap);
+            FileUtil.saveBitmap(pattern, mActivityContext);
+            updateTexture(pattern);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
+
     class DownloadPattern extends AsyncTask<String, Void, Bitmap> {
 
         @Override
@@ -509,7 +533,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
             Bitmap result = null;
             try {
                 result = Picasso.with(mActivityContext).load(strings[0]).resize(512,512).get();
-                FileUtil.saveBitmap(result, mActivityContext);
+
             } catch (IOException e) {
                 Log.e(TAG, "could not download pattern", e);
             }
@@ -519,7 +543,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         @Override
         protected void onPostExecute(final Bitmap bitmap) {
             Bitmap pattern = Bitmap.createBitmap(bitmap);
-            updateTexture(pattern);
+
         }
     }
 }

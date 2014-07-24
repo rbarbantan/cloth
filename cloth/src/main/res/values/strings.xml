@@ -3,10 +3,58 @@
 	<string name="setAsBackground">Set as background</string>
     <string name="unlock">Unlock pattern pack</string>
     <string name="opengl">OpenGL 2.0 is needed !</string>
+    <string name="search_title">Search</string>
+    <string name="search_hint">Find a pattern</string>
 
     <string-array name="pattern_sources">
+        <item>Featured</item>
         <item>Popular</item>
         <item>Recent</item>
-        <item>Random</item>
     </string-array>
+
+    <string-array name="featured">
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/121/121523.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/320/320020.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/2720/2720470.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/4066/4066844.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/898/898582.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/642/642918.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/1306/1306993.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/2479/2479908.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/1232/1232338.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/2271/2271796.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/2086/2086635.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/3383/3383085.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/2557/2557448.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/3355/3355675.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/980/980466.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/1979/1979147.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/3029/3029494.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/3310/3310632.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/3457/3457979.png</item>
+        <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/624/624174.png</item>
+    </string-array>
+
+    <string-array name="play_key">
+        <item>MIIBIjANBgkqhkiG9w0BAQEFAAOC</item>
+        <item>RdOiowsD2rg2nzmQTm3lnBJjfTN6FYSZBcrSO</item>
+        <item>AQ8AMIIBCgKCAQEAqnnY0FyW9VNE/0jX</item>
+        <item>csZm1IuVXzge3PNbSmQshn</item>
+        <item>Epm2OkYN9cUSUf4IZNHb6qHrgsAt9asW</item>
+        <item>hHnVJOX6ah3OO/eAe0TOlw7ask</item>
+        <item>mRfI8GFSdFa+csZm1IuVXzge3PNbSmQshn</item>
+        <item>GoDRoWKVrNoTEHWnpTl7DsWisI</item>
+        <item>Ub2kU4oEHDcqKzi9cDHH1lc+GoDRoWKV/G</item>
+        <item>fW6gKkh3MxJ5NEmafqMXfUuiDgy6c</item>
+        <item>hHnVJOX6ah3OO/eAe0TOlw7askwt+OhTbv8YqN</item>
+        <item>eAe0TOlw7askeAedsfTOlw8ask</item>
+        <item>RdOiowsD2rg2nzmQTm3lnBJjfTN6FYSZBcrSO+z+f</item>
+        <item>IBCgKCAQEAqnnY043vt34s</item>
+        <item>FU5DSHBHCBibEfW6gKkh3MxJ5NEmafqMXfUuiDgy6cMPmum0BaKGX</item>
+        <item>wsD2rg2nzmQTm3lnBJjfTN6FYSZ</item>
+        <item>qFZ/ksgrNoTEHWnpTl7DsWisITla0wQ+wIDAQAB</item>
+        <item>iowsD2rg2nzmQTm3lnBJjfTN6F</item>
+    </string-array>
+
+    <string name="ad_unit_id">ca-app-pub-4480751024607932/2204208403</string>
 </resources>

@@ -3,29 +3,49 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <android.opengl.GLSurfaceView
         android:id="@+id/clothView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingTop="?android:attr/actionBarSize">
-        <org.lucasr.twowayview.TwoWayView
-            android:id="@+id/list"
-            android:layout_width="@dimen/rowWidth"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_alignParentLeft="true"/>
-        <SeekBar
-            android:id="@+id/seekbar"
-            android:layout_weight="1"
-            android:layout_width="0dp"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"/>
+            android:layout_marginTop="-6dp"
+            android:indeterminate="true"
+            android:visibility="invisible"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <org.lucasr.twowayview.TwoWayView
+                android:id="@+id/list"
+                android:layout_width="@dimen/rowWidth"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_alignParentLeft="true"/>
+            <SeekBar
+                android:id="@+id/seekbar"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"/>
+        </LinearLayout>
+        <com.google.android.gms.ads.AdView
+            xmlns:ads="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/adView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            ads:adUnitId="@string/ad_unit_id"
+            ads:adSize="BANNER"/>
     </LinearLayout>
 
 </RelativeLayout>
