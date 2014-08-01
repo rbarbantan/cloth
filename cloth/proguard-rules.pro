@@ -31,3 +31,13 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
+
+-keep class retrofit.** { *; }
+-dontwarn retrofit.**
+
+-keep class okio.** { *; }
+-dontwarn okio.**
+
+-keep class com.squareup.** { *; }
+-dontwarn com.squareup.**
+

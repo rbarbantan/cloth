@@ -45,7 +45,7 @@ public class PatternGallery extends ActionBarActivity implements PatternFragment
     private static final int IMAGE_PICKER_SELECT = 1982;
 
     IabHelper mHelper;
-    private final static String SKU_PREMIUM = "android.test.purchased";
+    private final static String SKU_PREMIUM = "pro_license";//"android.test.purchased";
     private final static int REQUEST_CODE = 1892;
     private boolean isPremium = false;
     private boolean needsPremium = false;

@@ -14,6 +14,26 @@ repositories {
     maven { url 'http://download.crashlytics.com/maven' }
 }
 
+println project.property("cloth.properties")
+println new File(project.property("cloth.properties")).exists()
+
+if(project.hasProperty("cloth.properties")
+        && new File(project.property("cloth.properties")).exists()) {
+    println 'has property'
+    Properties props = new Properties()
+    props.load(new FileInputStream(file(project.property("cloth.properties"))))
+
+    android {
+        signingConfigs {
+            release {
+                storeFile file(props['keystore'])
+                storePassword props['keystore.password']
+                keyAlias props['key.alias']
+                keyPassword props['key.password']
+            }
+        }
+    }
+}
 
 android {
     compileSdkVersion 19
@@ -25,13 +45,29 @@ android {
         versionCode 15
         versionName '2.0'
     }
+    /*signingConfigs {
+        release {
+            storeFile file('g:\\work\\workspace\\guerrilla\\android.keystore')
+            storePassword System.console().readLine("\n\$ Enter keystore password: ")
+            keyAlias System.console().readLine("\n\$ Enter key alias: ")
+            keyPassword System.console().readLine("\n\$ Enter key password: ")
+        }
+    }*/
+
     buildTypes {
         release {
-            runProguard false
+            signingConfig signingConfigs.release
+            runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     productFlavors {
+    }
+
+    lintOptions {
+        abortOnError false
+        absolutePaths false
+        lintConfig file("lint.xml")
     }
 }
 
