@@ -3,23 +3,11 @@ package ro.cornholio.wallpaper.cloth;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
-import com.crashlytics.android.Crashlytics;
-
-import java.io.ByteArrayInputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-
 import ro.cornholio.wallpaper.cloth.render.ClothRenderer;
-import ro.cornholio.wallpaper.cloth.util.DebugUtils;
 
 /**
  * Created by rares on 6/11/2014.
@@ -43,9 +31,6 @@ public abstract class OpenGLES2WallpaperService extends GLWallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            if(!DebugUtils.isDebuggable(getApplicationContext())) {
-                Crashlytics.start(getApplicationContext());
-            }
 
             // Check if the system supports OpenGL ES 2.0.
             final ActivityManager activityManager =
@@ -85,8 +70,8 @@ public abstract class OpenGLES2WallpaperService extends GLWallpaperService {
 
         @Override
         public void onTouchEvent(MotionEvent event) {
-            //Log.d(TAG, "ontouchevent");
-            if(event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+            if(event.getActionMasked() == MotionEvent.ACTION_MOVE ||
+                    event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 renderer.touch(event.getX(), event.getY());
             }
         }

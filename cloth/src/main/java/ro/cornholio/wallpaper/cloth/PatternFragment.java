@@ -3,10 +3,8 @@ package ro.cornholio.wallpaper.cloth;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.opengl.GLSurfaceView;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -18,23 +16,17 @@ import android.widget.AdapterView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import org.lucasr.twowayview.TwoWayView;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import ro.cornholio.wallpaper.cloth.api.ColourLoversClient;
 import ro.cornholio.wallpaper.cloth.render.ClothRenderer;
 import ro.cornholio.wallpaper.cloth.util.FileUtil;
@@ -46,7 +38,6 @@ public class PatternFragment extends Fragment{
     private static final String TAG = PatternFragment.class.getName();
     private static final String TYPE = "type";
     private static final int MIN_ZOOM = 4;
-    private static final String IS_PREMIUM = "is_premium";
     TwoWayView patternList;
     PatternAdapter adapter;
     PatternObserver observer;
@@ -56,16 +47,13 @@ public class PatternFragment extends Fragment{
     private Bitmap pattern;
     private SourceType listType;
     private int current;
-    private String patternUrl;
     private int zoom=MIN_ZOOM;
     private String query;
-    private AdView adView;
 
-    public static PatternFragment newInstance(SourceType type, boolean isPremium){
+    public static PatternFragment newInstance(SourceType type){
         PatternFragment fragment = new PatternFragment();
         Bundle args = new Bundle();
         args.putString(TYPE, type.name());
-        args.putBoolean(IS_PREMIUM, isPremium);
         fragment.setArguments(args);
         return fragment;
     }
@@ -74,7 +62,6 @@ public class PatternFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.pattern_fragment, container, false);
         patternList = (TwoWayView) root.findViewById(R.id.list);
-        adView = (AdView) root.findViewById(R.id.adView);
         progressBar = (ProgressBar) root.findViewById(R.id.progressBar);
         clothView = (GLSurfaceView) root.findViewById(R.id.clothView);
         clothView.setEGLContextClientVersion(2);
@@ -113,26 +100,11 @@ public class PatternFragment extends Fragment{
         current = 0;
         adapter = new PatternAdapter(getActivity(),R.layout.pattern, new ArrayList<Pattern>(), listType!= SourceType.Featured);
         patternList.setAdapter(adapter);
-        switch (listType){
-            case Featured:
-                patternList.setOnItemClickListener(freeListener);
-                break;
-            default:
-                patternList.setOnItemClickListener(paidListener);
-                patternList.setOnScrollListener(scrollListener);
-                break;
-        }
+        patternList.setOnItemClickListener(freeListener);
+        patternList.setOnScrollListener(scrollListener);
+
         getPatterns(true);
-        updateUI(getArguments().getBoolean(IS_PREMIUM));
-        // Get tracker.
-        Tracker t = ((ClothApplication) getActivity().getApplication()).getTracker();
 
-        // Set screen name.
-        // Where path is a String representing the screen name.
-        t.setScreenName(listType.toString());
-
-        // Send a screen view.
-        t.send(new HitBuilders.AppViewBuilder().build());
         return root;
     }
 
@@ -144,27 +116,12 @@ public class PatternFragment extends Fragment{
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (adView != null) {
-            adView.resume();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        if (adView != null) {
-            adView.pause();
-        }
-        super.onPause();
-    }
-
     private void getPatterns(final boolean cleanSearch){
         progressBar.setVisibility(View.VISIBLE);
         Callback<List<Pattern>> callback = new Callback<List<Pattern>>() {
             @Override
-            public void success(List<Pattern> patterns, Response response) {
+            public void onResponse(Call<List<Pattern>> call, Response<List<Pattern>> response) {
+                List<Pattern> patterns = response.body();
                 if(isAdded()){
                     if(cleanSearch) {
                         current = patterns.size();
@@ -178,8 +135,8 @@ public class PatternFragment extends Fragment{
             }
 
             @Override
-            public void failure(RetrofitError error) {
-                Log.e(TAG, "could not get patterns", error);
+            public void onFailure(Call<List<Pattern>> call, Throwable t) {
+                Log.e(TAG, "could not get patterns", t);
             }
         };
 
@@ -188,29 +145,14 @@ public class PatternFragment extends Fragment{
                 getFeatured();
                 break;
             case Popular:
-                ColourLoversClient.getInstance().listTopPatterns(this.query, current, callback);
+                ColourLoversClient.getInstance().listTopPatterns(this.query, current).enqueue(callback);
                 break;
             case Recent:
-                ColourLoversClient.getInstance().listLatestPatterns(this.query, current,callback);
+                ColourLoversClient.getInstance().listLatestPatterns(this.query, current).enqueue(callback);
                 break;
         }
     }
 
-    public void updateUI(boolean isPremium){
-        Log.d(TAG, "updating " + isPremium);
-        if(adView != null) {
-            if(!isPremium) {
-                AdRequest adRequest = new AdRequest.Builder()
-                        .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                        //.addTestDevice("INSERT_YOUR_HASHED_DEVICE_ID_HERE")
-                        .build();
-                adView.loadAd(adRequest);
-            }else {
-                adView.pause();
-                adView.setVisibility(View.GONE);
-            }
-        }
-    }
     private void getFeatured() {
         String[] featured = getActivity().getResources().getStringArray(R.array.featured);
         List<Pattern> newPatterns = new ArrayList<Pattern>();
@@ -228,7 +170,7 @@ public class PatternFragment extends Fragment{
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             final String imageUrl = ((Pattern) adapterView.getAdapter().getItem(i)).imageUrl;
             Picasso.with(getActivity()).load(imageUrl).resize(512,512).into(target);
-            observer.itemSelected(false);
+            observer.itemSelected();
 
         }
     };
@@ -237,7 +179,7 @@ public class PatternFragment extends Fragment{
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             final String imageUrl = ((Pattern) adapterView.getAdapter().getItem(i)).imageUrl;
             Picasso.with(getActivity()).load(imageUrl).resize(512,512).into(target);
-            observer.itemSelected(true);
+            observer.itemSelected();
         }
     };
 
@@ -271,7 +213,6 @@ public class PatternFragment extends Fragment{
         }
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
         editor.putInt("zoom", zoom);
-        editor.putString("pattern", patternUrl);
         editor.commit();
     }
 
@@ -281,7 +222,7 @@ public class PatternFragment extends Fragment{
     }
 
     public interface PatternObserver {
-        void itemSelected(boolean paid);
+        void itemSelected();
     }
 
     private TwoWayView.OnScrollListener scrollListener = new TwoWayView.OnScrollListener() {

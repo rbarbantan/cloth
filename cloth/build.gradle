@@ -1,25 +1,7 @@
-buildscript {
-    repositories {
-        maven { url 'http://download.crashlytics.com/maven' }
-    }
-
-    dependencies {
-        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
-    }
-}
-apply plugin: 'android'
-apply plugin: 'crashlytics'
-
-repositories {
-    maven { url 'http://download.crashlytics.com/maven' }
-}
-
-println project.property("cloth.properties")
-println new File(project.property("cloth.properties")).exists()
+apply plugin: 'com.android.application'
 
 if(project.hasProperty("cloth.properties")
         && new File(project.property("cloth.properties")).exists()) {
-    println 'has property'
     Properties props = new Properties()
     props.load(new FileInputStream(file(project.property("cloth.properties"))))
 
@@ -36,32 +18,22 @@ if(project.hasProperty("cloth.properties")
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '20'
+    compileSdkVersion 23
+    buildToolsVersion '23.0.3'
+
     defaultConfig {
         applicationId 'ro.cornholio.wallpaper.cloth'
-        minSdkVersion 11
-        targetSdkVersion 19
-        versionCode 15
-        versionName '2.0'
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 16
+        versionName '3.0'
     }
-    /*signingConfigs {
-        release {
-            storeFile file('g:\\work\\workspace\\guerrilla\\android.keystore')
-            storePassword System.console().readLine("\n\$ Enter keystore password: ")
-            keyAlias System.console().readLine("\n\$ Enter key alias: ")
-            keyPassword System.console().readLine("\n\$ Enter key password: ")
-        }
-    }*/
 
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            runProguard true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled false
         }
-    }
-    productFlavors {
     }
 
     lintOptions {
@@ -73,12 +45,11 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:19.+'
-    compile 'com.google.android.gms:play-services:5.0.77'
-    compile 'org.lucasr.twowayview:twowayview:0.1.0'
-    compile 'com.squareup.picasso:picasso:2.3.2'
-    compile 'com.squareup.retrofit:retrofit:1.6.1'
-    compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
-    compile 'com.squareup.okhttp:okhttp:2.0.0'
-    compile 'com.crashlytics.android:crashlytics:1.+'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:recyclerview-v7:23.2.1'
+    compile 'org.lucasr.twowayview:twowayview:0.1.4'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.retrofit2:retrofit:2.0.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0'
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
 }

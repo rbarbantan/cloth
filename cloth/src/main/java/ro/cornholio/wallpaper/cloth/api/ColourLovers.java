@@ -2,10 +2,9 @@ package ro.cornholio.wallpaper.cloth.api;
 
 import java.util.List;
 
-import retrofit.Callback;
-import retrofit.http.GET;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
 import ro.cornholio.wallpaper.cloth.Pattern;
 
 /**
@@ -13,8 +12,8 @@ import ro.cornholio.wallpaper.cloth.Pattern;
  */
 public interface ColourLovers {
     @GET("/api/patterns/top?format=json&numResults=20")
-    void listTopPatterns(@Query("keywords")String search, @Query("resultOffset")int offset, Callback<List<Pattern>> callback);
+    Call<List<Pattern>> listTopPatterns(@Query("keywords")String search, @Query("resultOffset")int offset);
 
     @GET("/api/patterns/new?format=json&numResults=20")
-    void listLatestPatterns(@Query("keywords")String search, @Query("resultOffset")int offset, Callback<List<Pattern>> callback);
+    Call<List<Pattern>> listLatestPatterns(@Query("keywords")String search, @Query("resultOffset")int offset);
 }

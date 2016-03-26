@@ -1,7 +1,7 @@
 package ro.cornholio.wallpaper.cloth.api;
 
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by rares on 6/10/2014.
@@ -13,10 +13,11 @@ public class ColourLoversClient {
 
     public static ColourLovers getInstance(){
         if(instance == null) {
-            RestAdapter restAdapter = new RestAdapter.Builder()
-                    .setEndpoint("http://www.colourlovers.com")
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("http://www.colourlovers.com")
+                    .addConverterFactory(GsonConverterFactory.create())
                     .build();
-            instance = restAdapter.create(ColourLovers.class);
+            instance = retrofit.create(ColourLovers.class);
         }
         return instance;
     }

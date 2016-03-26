@@ -1,25 +1,6 @@
 package ro.cornholio.wallpaper.cloth.render;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.util.Vector;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
-
-import ro.cornholio.wallpaper.cloth.R;
-import ro.cornholio.wallpaper.cloth.physics.VerletSystem;
-import ro.cornholio.wallpaper.cloth.util.FileUtil;
-import ro.cornholio.wallpaper.cloth.util.RawResourceReader;
-import ro.cornholio.wallpaper.cloth.util.ShaderHelper;
-import ro.cornholio.wallpaper.cloth.util.TextureHelper;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -33,6 +14,22 @@ import android.util.Log;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import ro.cornholio.wallpaper.cloth.R;
+import ro.cornholio.wallpaper.cloth.physics.VerletSystem;
+import ro.cornholio.wallpaper.cloth.util.FileUtil;
+import ro.cornholio.wallpaper.cloth.util.RawResourceReader;
+import ro.cornholio.wallpaper.cloth.util.ShaderHelper;
+import ro.cornholio.wallpaper.cloth.util.TextureHelper;
 
 /**
  * This class implements our custom renderer. Note that the GL10 parameter passed in is unused for OpenGL ES 2.0
@@ -131,17 +128,11 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 	/** This is a handle to our cube shading program. */
 	private int mProgramHandle;
 		
-	/** This is a handle to our light point program. */
-	//private int mPointProgramHandle;
-	//private int mPointProgramHandle2;
-	
 	/** This is a handle to our texture data. */
 	private int mTextureDataHandle;
 	
 	final int N = VerletSystem.N;
 	int M;
-	
-	//float[] meshPositionData;
 	
 	float[] meshTextureCoordinateData;
 	
@@ -174,10 +165,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 		// Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 		
-		// The below glEnable() call is a holdover from OpenGL ES 1, and is not needed in OpenGL ES 2.
-		// Enable texture mapping
-		// GLES20.glEnable(GLES20.GL_TEXTURE_2D);
-			
+
 		// Position the eye in front of the origin.
 		final float eyeX = 0.0f;
 		final float eyeY = 0.0f;
@@ -193,10 +181,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 		final float upY = 1.0f;
 		final float upZ = 0.0f;
 
-		// Set the view matrix. This matrix can be said to represent the camera position.
-		// NOTE: In OpenGL 1, a ModelView matrix is used, which is a combination of a model and
-		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
-		Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);		
+		Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);
 
 		final String vertexShader = getVertexShader();   		
  		final String fragmentShader = getFragmentShader();			
@@ -207,22 +192,12 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 		mProgramHandle = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, 
 				new String[] {"a_Position",  "a_Color", "a_Normal", "a_TexCoordinate"});								                                							       
         
-        // Define a simple shader program for our point.
-        //final String pointVertexShader = RawResourceReader.readTextFileFromRawResource(mActivityContext, R.raw.point_vertex_shader);
-        //final String pointFragmentShader = RawResourceReader.readTextFileFromRawResource(mActivityContext, R.raw.point_fragment_shader);
-        
-        //final int pointVertexShaderHandle = ShaderHelper.compileShader(GLES20.GL_VERTEX_SHADER, pointVertexShader);
-        //final int pointFragmentShaderHandle = ShaderHelper.compileShader(GLES20.GL_FRAGMENT_SHADER, pointFragmentShader);
-        //mPointProgramHandle = ShaderHelper.createAndLinkProgram(pointVertexShaderHandle, pointFragmentShaderHandle,
-        //		new String[] {"a_Position"});
-        
         // Load the texture
-            mTextureDataHandle = TextureHelper.loadTexture(mActivityContext, R.drawable.cloth_logo);
+		mTextureDataHandle = TextureHelper.loadTexture(mActivityContext, R.drawable.default_cloth);
 	}
 
     public void updateTexture(Bitmap pattern) {
         mTextureDataHandle = TextureHelper.loadTexture(mActivityContext, pattern.copy(pattern.getConfig(),true));
-        //pattern.recycle();
     }
 		
 	@Override
@@ -235,11 +210,8 @@ public class ClothRenderer implements GLSurfaceView.Renderer
             bitmap = BitmapFactory.decodeStream(mActivityContext.openFileInput("pattern"));
 
         } catch (FileNotFoundException e) {
-            Log.e(TAG, "could not find cached pattern", e);
             String patternUrl = PreferenceManager.getDefaultSharedPreferences(mActivityContext).getString("pattern",null);
             if(patternUrl != null){
-                //DownloadPattern task = new DownloadPattern();
-                //task.execute(patternUrl);
                 Picasso.with(mActivityContext).load(patternUrl).resize(512,512).into(target);
             }
         }
@@ -247,7 +219,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         if (bitmap != null) {
             mTextureDataHandle = TextureHelper.loadTexture(mActivityContext, bitmap);
         }else {
-            mTextureDataHandle = TextureHelper.loadTexture(mActivityContext, R.drawable.cloth_logo);
+            mTextureDataHandle = TextureHelper.loadTexture(mActivityContext, R.drawable.cloth);
         }
 
 		// Set the OpenGL viewport to the same size as the surface.
@@ -268,8 +240,6 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 		M = (int) Math.ceil(ratio * N) + 1;
 		final float[] meshColorData = new float[4*6*(M-1)*(N-1)];
 		for(int i=0; i<meshColorData.length; i+=4){
-			//Log.d(TAG, "wtf: " + (float)i/meshColorData.length);
-			float color = (float) Math.random();
 			meshColorData[i] = 1f;
 			meshColorData[i+1] = 1f;
 			meshColorData[i+2] = 1f;
@@ -294,6 +264,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
 		mMeshTextureCoordinates.put(meshTextureCoordinateData).position(0);
 	
 		int zoom = PreferenceManager.getDefaultSharedPreferences(mActivityContext).getInt("zoom", 4);
+		// keep it anchored for now
 		verlet = new VerletSystem(width,height, true, zoom);
 
         setZoom(zoom);
@@ -307,23 +278,23 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         for(float i=0; i<N-1; i++) {
             for(float j=0; j<M-1; j++) {
 
-                meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
-                meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
+                meshTextureCoordinateData[current++] = j/(M-1)*dx;
+                meshTextureCoordinateData[current++] = i/(N-1)*dy;
 
-                meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
-                meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
+                meshTextureCoordinateData[current++] = j/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (i+1)/(N-1)*dy;
 
-                meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
-                meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
+                meshTextureCoordinateData[current++] = (j+1)/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (i+1)/(N-1)*dy;
 
-                meshTextureCoordinateData[current++] = (float)j/(M-1)*dx;
-                meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
+                meshTextureCoordinateData[current++] = j/(M-1)*dx;
+                meshTextureCoordinateData[current++] = i/(N-1)*dy;
 
-                meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
-                meshTextureCoordinateData[current++] = (float)(i+1)/(N-1)*dy;
+                meshTextureCoordinateData[current++] = (j+1)/(M-1)*dx;
+                meshTextureCoordinateData[current++] = (i+1)/(N-1)*dy;
 
-                meshTextureCoordinateData[current++] = (float)(j+1)/(M-1)*dx;
-                meshTextureCoordinateData[current++] = (float)i/(N-1)*dy;
+                meshTextureCoordinateData[current++] = (j+1)/(M-1)*dx;
+                meshTextureCoordinateData[current++] = i/(N-1)*dy;
 
             }
         }
@@ -365,9 +336,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         // Calculate position of the light. Rotate and then push into the distance.
         Matrix.setIdentityM(mLightModelMatrix, 0);
         Matrix.translateM(mLightModelMatrix, 0, 0.0f, 9.0f, -4.0f);
-        //Matrix.rotateM(mLightModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
-        //Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 2.0f);
-               
+
         Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
         Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);                        
         
@@ -380,50 +349,19 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         //Draw mesh
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, 6.0f, -5.0f);
-        //Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
-        /*if((int)(Math.random()*20) == 5){
+
+		/*if((int)(Math.random()*20) == 5){
         	verlet.touch((int)(Math.random()*500), (int)(Math.random()*200), 0.05f);
         }*/
         verlet.timeStep();
         drawMesh();
         
-        /*
-        // Draw some cubes.
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 4.0f, 0.0f, -7.0f);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);        
-        drawCube();
-                        
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, -4.0f, 0.0f, -7.0f);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 1.0f, 0.0f);        
-        drawCube();
-        
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, 4.0f, -7.0f);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);        
-        drawCube();
-        
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, -4.0f, -7.0f);
-        drawCube();
-        
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, -5.0f);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 1.0f, 0.0f);        
-        //drawCube();  */    
-        
-        // Draw a point to indicate the light.
-        //GLES20.glUseProgram(mPointProgramHandle);        
-        //drawLight();
-        //long end = System.currentTimeMillis();
-        //Log.d(TAG,  "rendered frame in : " + (end - start));
-	}				
+	}
 
     public void touch(float x, float y){
         //Log.d(TAG, "touched at " +x+","+y+" " + verlet);
         if(verlet!= null) {
-            verlet.touch(x,y, 0.07f);
+            verlet.touch(x,y, 0.1f);
         }
     }
 	/**
@@ -483,30 +421,7 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6*(N-1)*(M-1));                               
 	}	
 
-	/**
-	 * Draws a point representing the position of the light.
-	 */
-	/*private void drawLight()
-	{
-		final int pointMVPMatrixHandle = GLES20.glGetUniformLocation(mPointProgramHandle, "u_MVPMatrix");
-        final int pointPositionHandle = GLES20.glGetAttribLocation(mPointProgramHandle, "a_Position");
-        
-		// Pass in the position.
-		GLES20.glVertexAttrib3f(pointPositionHandle, mLightPosInModelSpace[0], mLightPosInModelSpace[1], mLightPosInModelSpace[2]);
-
-		// Since we are not using a buffer object, disable vertex arrays for this attribute.
-        GLES20.glDisableVertexAttribArray(pointPositionHandle);  
-		
-		// Pass in the transformation matrix.
-		Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mLightModelMatrix, 0);
-		Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-		GLES20.glUniformMatrix4fv(pointMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-		
-		// Draw the point.
-		GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1);
-	}*/
-
-    private Target target = new Target() {
+	private Target target = new Target() {
 
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -526,24 +441,9 @@ public class ClothRenderer implements GLSurfaceView.Renderer
         }
     };
 
-    class DownloadPattern extends AsyncTask<String, Void, Bitmap> {
-
-        @Override
-        protected Bitmap doInBackground(String... strings) {
-            Bitmap result = null;
-            try {
-                result = Picasso.with(mActivityContext).load(strings[0]).resize(512,512).get();
-
-            } catch (IOException e) {
-                Log.e(TAG, "could not download pattern", e);
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(final Bitmap bitmap) {
-            Bitmap pattern = Bitmap.createBitmap(bitmap);
-
-        }
-    }
+	public void setGravity(float[] values) {
+		if(verlet != null) {
+			verlet.setGravity(values);
+		}
+	}
 }

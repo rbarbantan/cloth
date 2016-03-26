@@ -1,15 +1,15 @@
 package ro.cornholio.wallpaper.cloth.physics;
 
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.opengl.GLUtils;
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
-
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.opengl.GLUtils;
-import android.util.Log;
 
 
 public class VerletSystem {
@@ -322,9 +322,9 @@ public class VerletSystem {
 	}
 	
 	public void setGravity(float[] values) {
-		gravity[0] = values[0];
-		gravity[1] = values[1];
-		gravity[2] = values[2];
+		gravity[0] = -values[0];
+		gravity[1] = -values[1];
+		gravity[2] = -values[2];
 	}
 
 	/**

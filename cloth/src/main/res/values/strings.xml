@@ -34,27 +34,4 @@
         <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/3457/3457979.png</item>
         <item>http://colourlovers.com.s3.amazonaws.com/images/patterns/624/624174.png</item>
     </string-array>
-
-    <string-array name="play_key">
-        <item>MIIBIjANBgkqhkiG9w0BAQEFAAOC</item>
-        <item>RdOiowsD2rg2nzmQTm3lnBJjfTN6FYSZBcrSO</item>
-        <item>AQ8AMIIBCgKCAQEAqnnY0FyW9VNE/0jX</item>
-        <item>csZm1IuVXzge3PNbSmQshn</item>
-        <item>Epm2OkYN9cUSUf4IZNHb6qHrgsAt9asW</item>
-        <item>hHnVJOX6ah3OO/eAe0TOlw7ask</item>
-        <item>mRfI8GFSdFa+csZm1IuVXzge3PNbSmQshn</item>
-        <item>GoDRoWKVrNoTEHWnpTl7DsWisI</item>
-        <item>Ub2kU4oEHDcqKzi9cDHH1lc+GoDRoWKV/G</item>
-        <item>fW6gKkh3MxJ5NEmafqMXfUuiDgy6c</item>
-        <item>hHnVJOX6ah3OO/eAe0TOlw7askwt+OhTbv8YqN</item>
-        <item>eAe0TOlw7askeAedsfTOlw8ask</item>
-        <item>RdOiowsD2rg2nzmQTm3lnBJjfTN6FYSZBcrSO+z+f</item>
-        <item>IBCgKCAQEAqnnY043vt34s</item>
-        <item>FU5DSHBHCBibEfW6gKkh3MxJ5NEmafqMXfUuiDgy6cMPmum0BaKGX</item>
-        <item>wsD2rg2nzmQTm3lnBJjfTN6FYSZ</item>
-        <item>qFZ/ksgrNoTEHWnpTl7DsWisITla0wQ+wIDAQAB</item>
-        <item>iowsD2rg2nzmQTm3lnBJjfTN6F</item>
-    </string-array>
-
-    <string name="ad_unit_id">ca-app-pub-4480751024607932/2204208403</string>
 </resources>
