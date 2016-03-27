@@ -37,7 +37,7 @@ import ro.cornholio.wallpaper.cloth.util.FileUtil;
 public class PatternFragment extends Fragment{
     private static final String TAG = PatternFragment.class.getName();
     private static final String TYPE = "type";
-    private static final int MIN_ZOOM = 4;
+    private static final int MIN_ZOOM = 3;
     TwoWayView patternList;
     PatternAdapter adapter;
     PatternObserver observer;

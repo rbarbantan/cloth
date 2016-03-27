@@ -3,7 +3,12 @@ package ro.cornholio.wallpaper.cloth;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
@@ -20,8 +25,11 @@ public abstract class OpenGLES2WallpaperService extends GLWallpaperService {
         return new OpenGLES2Engine();
     }
 
-    class OpenGLES2Engine extends GLEngine {
+    class OpenGLES2Engine extends GLEngine implements SensorEventListener {
         private ClothRenderer renderer;
+        SensorManager sensorManager;
+        Sensor gravity;
+
 
         public OpenGLES2Engine() {
             super();
@@ -31,6 +39,8 @@ public abstract class OpenGLES2WallpaperService extends GLWallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            gravity = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
 
             // Check if the system supports OpenGL ES 2.0.
             final ActivityManager activityManager =
@@ -75,7 +85,31 @@ public abstract class OpenGLES2WallpaperService extends GLWallpaperService {
                 renderer.touch(event.getX(), event.getY());
             }
         }
-    }
 
-    abstract GLSurfaceView.Renderer getNewRenderer();
+        @Override
+        public void onVisibilityChanged(boolean visible) {
+            super.onVisibilityChanged(visible);
+            if (visible) {
+                if(sensorManager != null && gravity != null) {
+                    sensorManager.registerListener(this, gravity, SensorManager.SENSOR_DELAY_NORMAL);
+                }
+            } else {
+                if(sensorManager != null) {
+                    sensorManager.unregisterListener(this);
+                }
+            }
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            //Log.d(TAG,"event: " + event.values[0]+","+event.values[1]+","+event.values[2]);
+            renderer.setGravity(event.values);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+
+    }
 }

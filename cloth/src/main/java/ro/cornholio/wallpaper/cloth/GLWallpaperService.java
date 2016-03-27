@@ -1,9 +1,14 @@
 package ro.cornholio.wallpaper.cloth;
 
 import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
 import android.service.wallpaper.WallpaperService;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 /**
@@ -11,7 +16,9 @@ import android.view.SurfaceHolder;
  */
 public abstract class GLWallpaperService extends WallpaperService{
 
-    public class GLEngine extends Engine{
+    abstract GLSurfaceView.Renderer getNewRenderer();
+
+    public class GLEngine extends Engine {
 
         public class ClothSurfaceView extends GLSurfaceView {
             public ClothSurfaceView(Context context) {
@@ -44,7 +51,6 @@ public abstract class GLWallpaperService extends WallpaperService{
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
-
             if (rendererHasBeenSet) {
                 if (visible) {
                     glSurfaceView.onResume();

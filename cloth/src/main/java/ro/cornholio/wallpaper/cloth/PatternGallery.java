@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
@@ -68,7 +69,11 @@ public class PatternGallery extends AppCompatActivity implements PatternFragment
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            ((PatternFragment)getSupportFragmentManager().findFragmentById(R.id.container)).search(query, true);
+            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+            if(fragment != null) {
+                ((PatternFragment)fragment).search(query, true);
+            }
+
         }
         if(searchMenu != null) {
             MenuItemCompat.collapseActionView(searchMenu);
